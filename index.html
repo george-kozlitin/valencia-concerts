@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Валенсия: афиша 14–25 октября</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600&display=swap">
+<style>
+/* Layout: sticky filter bar, then a day-by-day timeline of event cards; each day is a band with a big date numeral on the left */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --fg:#14202e; --muted:#5b6878; --line:#dde2e8;
+  --accent:#1f5fae; --accent-soft:#e3edf9; --orange:#e8731c; --orange-soft:#fdeedf;
+  --ok:#1d7a4a; --ok-soft:#e1f3e9; --warn:#a35a00; --warn-soft:#fbefd9; --bad:#b3261e; --bad-soft:#f9e1df;
+  --display:"Unbounded", "Arial Black", system-ui, sans-serif;
+  --body:"Onest", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f151d; --surface:#17202b; --fg:#e8edf3; --muted:#9aa7b6; --line:#273444;
+  --accent:#7fb2f0; --accent-soft:#1c2c42; --orange:#f39a52; --orange-soft:#3a2716;
+  --ok:#6fd39c; --ok-soft:#163324; --warn:#f0b65c; --warn-soft:#382a12; --bad:#f08a82; --bad-soft:#3b1a18; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f151d; --surface:#17202b; --fg:#e8edf3; --muted:#9aa7b6; --line:#273444;
+  --accent:#7fb2f0; --accent-soft:#1c2c42; --orange:#f39a52; --orange-soft:#3a2716;
+  --ok:#6fd39c; --ok-soft:#163324; --warn:#f0b65c; --warn-soft:#382a12; --bad:#f08a82; --bad-soft:#3b1a18; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{padding-block:32px 8px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,5vw,40px);line-height:1.1;margin:0;text-wrap:balance}
+h1 span{color:var(--orange)}
+.lede{color:var(--muted);max-width:62ch;margin:10px 0 0}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-block:12px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.row+.row{margin-top:8px}
+.lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-right:4px;min-width:52px}
+.chip{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:5px 11px;border-radius:999px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.chip.pick[aria-pressed="true"]{background:var(--orange);border-color:var(--orange)}
+.chip:focus-visible,.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.count{margin-left:auto;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+main{padding-block:8px 48px}
+.day{display:grid;grid-template-columns:78px 1fr;gap:16px;padding-block:22px;border-bottom:1px solid var(--line)}
+.dnum{font-family:var(--display);font-weight:700;font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
+.dname{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:6px}
+.cards{display:grid;gap:12px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;grid-template-columns:62px 1fr auto;gap:4px 14px;min-width:0}
+.card.is-pick{border-color:var(--orange);box-shadow:inset 3px 0 0 var(--orange)}
+.card.is-off{opacity:.62}
+.time{font-family:var(--display);font-size:15px;font-weight:500;font-variant-numeric:tabular-nums;padding-top:2px}
+.main{min-width:0}
+.title{font-weight:600;font-size:17px;line-height:1.3;margin:0}
+.title .tag{font-size:11px;font-weight:600;color:var(--orange);background:var(--orange-soft);padding:2px 7px;border-radius:4px;margin-left:6px;vertical-align:2px;white-space:nowrap}
+.sub{color:var(--muted);font-size:13.5px;margin-top:2px}
+.desc{margin:8px 0 0;max-width:64ch}
+.note{margin:6px 0 0;font-size:13px;color:var(--muted)}
+.side{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:0}
+.price{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.s-ok{background:var(--ok-soft);color:var(--ok)}
+.s-low{background:var(--warn-soft);color:var(--warn)}
+.s-sold,.s-cancel{background:var(--bad-soft);color:var(--bad)}
+.s-free{background:var(--accent-soft);color:var(--accent)}
+.s-unknown,.s-members{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.actions{grid-column:2 / -1;display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.btn{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;text-decoration:none;padding:6px 12px;border-radius:7px;border:1px solid var(--line);color:var(--fg);background:var(--surface)}
+.btn:hover{border-color:var(--accent)}
+.btn.buy{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.btn .play{width:0;height:0;border-left:8px solid var(--orange);border-top:5px solid transparent;border-bottom:5px solid transparent}
+.vnote{font-size:12px;color:var(--muted);align-self:center}
+.empty{padding:40px 0;color:var(--muted)}
+footer{color:var(--muted);font-size:13px;padding-block:0 40px}
+footer p{max-width:70ch}
+footer a{color:var(--accent)}
+@media (max-width:640px){
+  .day{grid-template-columns:1fr;gap:10px}
+  .dhead{display:flex;align-items:baseline;gap:10px}
+  .dnum{font-size:30px}.dname{margin:0}
+  .card{grid-template-columns:1fr auto}
+  .time{grid-column:1 / -1}
+  .actions{grid-column:1 / -1}
+}
+</style>
+
+<header class="wrap">
+  <h1>Валенсия, <span>14–25 октября</span></h1>
+  <p class="lede">Концерты, классика, джаз и танец по всему городу. По каждому событию указаны цена, где купить билет и видео, чтобы послушать заранее. Оранжевым отмечен мой выбор. Данные собраны 14.10.2026 с сайтов площадок и билетных касс.</p>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="row" id="cats"><span class="lbl">Жанр</span></div>
+    <div class="row" id="days"><span class="lbl">День</span></div>
+    <div class="row">
+      <span class="lbl">Ещё</span>
+      <button class="chip pick" id="f-pick" aria-pressed="false">Только мой выбор</button>
+      <button class="chip" id="f-avail" aria-pressed="false">Скрыть отменённые и распроданные</button>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+</div>
+
+<main class="wrap" id="list"></main>
+
+<footer class="wrap">
+  <p>Цены указаны без сервисного сбора, если не сказано иначе. Наличие мест меняется быстро, поэтому перед поездкой откройте страницу покупки. Видео показывает артиста вживую, но не обязательно эту программу или этот состав. Расхождения отмечены под карточкой.</p>
+  <p>Источники: <a href="https://www.roigarena.com/es/eventos" target="_blank" rel="noopener">Roig Arena</a>, <a href="https://www.palauvalencia.com/" target="_blank" rel="noopener">Palau de la Música</a>, <a href="https://www.lesarts.com/es/programacion/" target="_blank" rel="noopener">Les Arts</a>, <a href="https://larambleta.com/" target="_blank" rel="noopener">La Rambleta</a>, <a href="https://www.jimmyglassjazz.net/" target="_blank" rel="noopener">Jimmy Glass</a>, <a href="https://www.laganzua.net/conciertos/valencia" target="_blank" rel="noopener">La Ganzúa</a>.</p>
+</footer>
+
+<script>
+const CATS = {pop:"Поп и рок", indie:"Инди", latin:"Латино и урбан", electro:"Электроника", classic:"Классика", jazz:"Джаз", dance:"Танец"};
+const ST = {ok:"в продаже", low:"мало мест", sold:"распродано", free:"вход свободный", members:"только для членов клуба", cancel:"отменён", unknown:"наличие не проверено"};
+const RA = "Roig Arena", RAA = "Roig Arena, малый зал Auditorio", PM = "Palau de la Música", JG = "Jimmy Glass Jazz Bar, Carrer Baja 28";
+const E = [
+ {d:"2026-10-14",t:"20:00",title:"Valencia Basket — Fenerbahçe",venue:RA,cat:"sport",price:"цена не найдена",st:"unknown",
+  desc:"Женская Евролига: «Валенсия» принимает «Фенербахче» из Стамбула.",
+  buy:"https://www.roigarena.com/es/event/valencia-basket-vs-fenerbahce-20261014/",buyL:"Страница матча",
+  links:[["Матч на FIBA","https://www.fiba.basketball/en/events/euroleague-women-26-27/games/135186-VBC-FENER"]]},
+ {d:"2026-10-14",t:"20:30",title:"Jim Snidero Quartet",venue:JG,cat:"jazz",price:"26 €",st:"ok",
+  desc:"Американский альт-саксофонист, классический нью-йоркский пост-боп. Входит в XV фестиваль современного джаза.",
+  buy:"https://www.jimmyglassjazz.net/contactoreservas/",buyL:"Забронировать столик",
+  video:"https://www.youtube.com/watch?v=l5IPBkEpuNA",note:"Билетов нет, столик бронируется на сайте клуба. Двери в 20:00."},
+ {d:"2026-10-15",t:"20:30",title:"Valencia Basket — Maccabi Tel Aviv",venue:RA,cat:"sport",price:"цена не найдена",st:"ok",
+  desc:"Мужская Евролига, один из самых громких соперников сезона.",
+  buy:"https://tickets.oneboxtds.com/roigarena/select/3018795?hl=es-ES",buyL:"Купить билет",
+  links:[["Билеты через клуб","https://www.valenciabasket.com/entradas-vs-maccabi"]],note:"Билеты именные, на входе спросят документ."},
+ {d:"2026-10-15",t:"21:00",title:"Leoni Torres",venue:RAA,cat:"latin",price:"48,50 €",st:"ok",
+  desc:"Кубинский певец: романтические баллады с салсой и тропическими ритмами.",
+  buy:"https://www.roigarena.com/es/event/leonni-torres-en-valencia-20261015/tickets/",
+  video:"https://www.youtube.com/watch?v=yHsamY_i1RY",note:"Стоячие места. Двери в 19:30."},
+ {d:"2026-10-16",t:"19:30",title:"Sir Mark Elder: Чайковский и Штраус",venue:"Les Arts, Auditori",cat:"classic",price:"от 10 €",st:"ok",pick:false,
+  desc:"Вагнер, вступление к «Лоэнгрину»; Первый концерт Чайковского (Павел Колесников); «Дон Жуан» и «Тиль Уленшпигель» Штрауса. Играет Orquestra de la Comunitat Valenciana.",
+  buy:"https://www.lesarts.com/es/programacion/c/1310-sir-mark-elder.html",
+  video:"https://www.youtube.com/watch?v=x9LkJNCDEWA",vnote:"Элдер дирижирует Штрауса, другая поэма"},
+ {d:"2026-10-16",t:"21:00",title:"Teenage Fanclub",venue:"Sala Moon, Sant Vicent Màrtir 200",cat:"indie",price:"37,40 €",st:"ok",pick:true,note:"Входной без мест. Касса пишет «высокий спрос», возможен сервисный сбор при оплате.",
+  desc:"Шотландская гитарная поп-группа из Глазго, классика инди 90-х, мелодии и многоголосие в духе Byrds и Big Star. Маленький клуб, артист близко.",
+  buy:"https://www.entradas.com/event/teenage-fanclub-gira-2026-sala-moon-valencia-21501918/",
+  video:"https://www.youtube.com/watch?v=dtXrIrtTyyQ",vnote:"полный сет на KEXP"},
+ {d:"2026-10-16",t:"21:00",title:"Melon Diesel",sub:"La Gira de Mr. Bond",venue:RAA,cat:"pop",price:"29,70–55 €",st:"ok",
+  desc:"Поп-рок из Гибралтара, хиты рубежа 90-х и 2000-х. Тур к 25-летию дебютного альбома.",
+  buy:"https://www.roigarena.com/es/event/melon-diesel-gira-mr-bond-20261016/tickets/",
+  video:"https://www.youtube.com/watch?v=42dXiITNTMw",note:"55 € включает meet & greet, 44 € включает саундчек."},
+ {d:"2026-10-16",t:"21:00",title:"Jorge Drexler",sub:"Gira Taracá",venue:RA,cat:"pop",price:"52,80–85 €",st:"ok",pick:true,
+  desc:"Уругвайский автор-исполнитель, обладатель «Оскара». Новый альбом «Taracá» построен на ритмах кандомбе, на сцене семь музыкантов. Сидячий концерт.",
+  buy:"https://www.roigarena.com/es/event/jorge-drexler-en-valencia-20261016/tickets/",
+  video:"https://www.youtube.com/watch?v=zKkBMTVmGio",vnote:"«Todo se transforma», вживую",
+  links:[["Клип «Toco madera»","https://www.youtube.com/watch?v=bIUMEbJdFY4"]]},
+ {d:"2026-10-17",t:"19:00",title:"Orquestra de València: Вагнер, Лахенман, Штраус",venue:PM+", Sala Iturbi",cat:"classic",price:"9,50–20 €",st:"ok",
+  desc:"«Тристан и Изольда» Вагнера, «Air» Лахенмана для ударных с оркестром (Alexej Gerassimez) и «Домашняя симфония» Штрауса. Дирижёр Alexander Liebreich.",
+  buy:"https://palauvalencia.com/event?id=2630&mod=1791541320",
+  video:"https://www.youtube.com/watch?v=PFYMBG64lNM",vnote:"«Air» с тем же дирижёром, другой солист",
+  links:[["Беседа с Лахенманом в 18:00","https://palauvalencia.com/event?id=2782&mod=1791904491"]],note:"Композитор приезжает сам и выступает с беседой перед концертом."},
+ {d:"2026-10-17",t:"21:00",title:"Antonio Orozco",sub:"La Gira de tu Vida",venue:RA,cat:"pop",price:"49,50–60,50 €",st:"ok",
+  desc:"Испанский поп-певец, автор баллад вроде «Devuélveme la vida», наставник в испанском «Голосе».",
+  buy:"https://www.roigarena.com/es/event/antonio-orozco-20261017/tickets/",
+  video:"https://www.youtube.com/watch?v=aoztRRCzWXk",vnote:"любительская запись"},
+ {d:"2026-10-17",t:"21:00",title:"El día H",sub:"трибьют Héroes del Silencio",venue:RAA,cat:"pop",price:"27,50 €",st:"ok",
+  desc:"Трибьют-группа Héroes del Culto играет хиты культовой испанской рок-группы Héroes del Silencio.",
+  buy:"https://www.roigarena.com/es/event/heroes-el-culto-el-dia-h-20261017/tickets/",
+  video:"https://www.youtube.com/watch?v=UYX84DuMHhM",note:"В кассе в день концерта 35 €."},
+ {d:"2026-10-17",t:"21:30",title:"Chiquita Movida",venue:"Sala Moon, Sant Vicent Màrtir 200",cat:"latin",price:"20 €",st:"ok",
+  desc:"Новая мадридская поп-группа рэпера Rayden, смесь поп-рока, рэпа и электроники. Дебютный альбом «Alta Vaina» вышел в 2026 году.",
+  buy:"https://feverup.com/m/518169",
+  video:"https://www.youtube.com/watch?v=hTKudYJywSw",vnote:"полный концерт, Radio 3",note:"Двери в 20:30."},
+ {d:"2026-10-17",t:"22:00",title:"Mónica Naranjo",venue:"Auditorio Marina Norte, La Marina",cat:"pop",price:"от 60,50 €",st:"unknown",
+  desc:"Испанская поп-дива с мощным голосом, звезда 90-х («Sobreviviré», «Desátame»). Тур с лучшими хитами, площадка под открытым небом у моря.",
+  buy:"https://www.elcorteingles.es/entradas/conciertos/entradas-monica-naranjo-valencia/",
+  video:"https://www.youtube.com/watch?v=mNw1aXCv2TI",note:"Билеты не возвращают и не меняют."},
+ {d:"2026-10-17",t:"23:00",title:"Las Noches del Arena: Himnos del Rock",venue:RAA,cat:"pop",price:"цена не найдена",st:"unknown",
+  desc:"Ночная вечеринка до 03:00: гимны испанского рока и поп-рока, поёт весь зал. Только 18+.",
+  buy:"https://www.roigarena.com/es/event/himnos-del-rock-20261017/",buyL:"Страница события"},
+ {d:"2026-10-17",t:"—",title:"Ryan Adams",venue:"Palau de les Arts",cat:"indie",price:"—",st:"cancel",
+  desc:"Отменён по болезни артиста вместе со всеми пятью испанскими датами осеннего тура.",
+  buy:"https://www.laganzua.net/noticias/32434-ryan-adams-cancela-conciertos-en-madrid-barcelona-valencia-zaragoza-y-granada-en-octubre-de-2026",buyL:"Новость об отмене"},
+ {d:"2026-10-18",t:"12:15",title:"Valencia Basket — Baxi Ferrol",venue:RA,cat:"sport",price:"цена не найдена",st:"ok",
+  desc:"Дневной матч, по всей видимости женской лиги Liga Femenina.",
+  buy:"https://tickets.oneboxtds.com/entradas-valenciabasket/select/3004511?hl=es-ES",buyL:"Купить билет"},
+ {d:"2026-10-18",t:"17:00",title:"Valencia Basket — UCAM Murcia",venue:RA,cat:"sport",price:"цена не найдена",st:"ok",
+  desc:"Чемпионат Испании ACB, мужчины.",
+  buy:"https://tickets.oneboxtds.com/roigarena/select/3041926?hl=es-ES",buyL:"Купить билет"},
+ {d:"2026-10-20",t:"19:30",title:"Малер, Симфония №3",venue:PM+", Sala Iturbi",cat:"classic",price:"47,50–50 €",st:"low",pick:true,
+  desc:"Самая масштабная симфония Малера, с двумя хорами и меццо Catriona Morison. Düsseldorfer Symphoniker и Adam Fischer, который записывает с ними весь цикл Малера.",
+  buy:"https://palauvalencia.com/event?id=2639&mod=1790159658",
+  video:"https://www.youtube.com/watch?v=dJtmUbQ2PAk",vnote:"тот же оркестр и дирижёр, Первая симфония",note:"Места за 25 и 38 € распроданы, остались за 50 €."},
+ {d:"2026-10-21",t:"19:15",title:"Trondheim Soloists, квартет",sub:"Notas de Noruega",venue:PM+", Sala Rodrigo",cat:"classic",price:"—",st:"members",
+  desc:"Моцарт, Твейтт, Первый квартет Чайковского, квартет Грига.",
+  buy:"https://palauvalencia.com/event?id=2785&mod=1791054357",buyL:"Страница концерта",
+  video:"https://www.youtube.com/watch?v=u6qAHKEgwrw",vnote:"полный оркестр, не квартет",note:"Концерт Sociedad Filarmónica, по пометке на сайте только для членов общества."},
+ {d:"2026-10-21",t:"19:30",title:"Lea Desandre & Thomas Dunford",sub:"Idylle",venue:"Les Arts, Teatre Martín i Soler",cat:"classic",price:"от 20 €",st:"ok",pick:true,
+  desc:"Меццо-сопрано и лютня. Французские песни барокко рядом с Сати, Дебюсси, Барбарой и Франсуазой Арди. Камерный зал, один из самых обаятельных дуэтов старинной музыки.",
+  buy:"https://www.lesarts.com/es/programacion/c/1318-lea-desandre-amp-thomas-dunford.html",
+  video:"https://www.youtube.com/watch?v=8iYUzw-PnwQ",vnote:"«À Chloris» из этой программы"},
+ {d:"2026-10-21",t:"19:30",title:"«Органная» симфония Сен-Санса",venue:"Кафедральный собор Валенсии, Puerta de los Hierros",cat:"classic",price:"бесплатно",st:"free",pick:true,
+  desc:"Orquestra de València, Liebreich и органист Pablo Márquez: вступление к «Тристану», «Katakomben» Давида Молинера и Третья симфония Сен-Санса под сводами собора.",
+  buy:"https://palauvalencia.com/event?id=2740&mod=1791494980",buyL:"Страница концерта",
+  video:"https://www.youtube.com/watch?v=BJJs_yw--zk",vnote:"сама симфония, другой оркестр",note:"Вход свободный до заполнения, приходите заранее."},
+ {d:"2026-10-21",t:"20:30",title:"Jure Pukl 4tet",sub:"Analog AI",venue:JG,cat:"jazz",price:"26 €",st:"ok",
+  desc:"Словенский тенор-саксофонист с нью-йоркской сцены, современный экспериментальный джаз. С ним John Escreet, Jonas Westergaard и Christian Lillinger.",
+  buy:"https://www.jimmyglassjazz.net/contactoreservas/",buyL:"Забронировать столик",
+  video:"https://www.youtube.com/watch?v=pjscw-0pt5A",links:[["О концерте","https://www.jimmyglassjazz.net/Eventos/jure-pukl-4tet-analog-ai/"]]},
+ {d:"2026-10-21",t:"21:00",title:"Joe Jackson",venue:"Teatro La Rambleta, Bulevar Sur",cat:"pop",price:"45–50 € + 3 € сбор",st:"ok",pick:true,
+  desc:"Британский ветеран нью-вейва и джаз-попа («Steppin' Out», «Is She Really Going Out with Him?»). Везёт новый альбом «Hope and Fury». Театр небольшой.",
+  buy:"https://larambleta.com/joe-jackson/#entradas",
+  video:"https://www.youtube.com/watch?v=0gTg5YJdZuc",vnote:"«Steppin' Out», тур 2026",note:"Билеты от 200 € на сайтах-перепродажах не брать, официально до 53 €."},
+ {d:"2026-10-23",t:"19:30",title:"Orquesta Nacional de España, Zimmermann",venue:PM+", Sala Iturbi",cat:"classic",price:"9,50–20 €",st:"ok",
+  desc:"Frank Peter Zimmermann, один из лучших скрипачей Германии, в редком концерте Уолтона, и Вторая симфония Рахманинова. Дирижёр David Afkham.",
+  buy:"https://palauvalencia.com/event?id=2642&mod=1790159850",
+  video:"https://www.youtube.com/watch?v=tmP_cG29gcg",vnote:"Циммерман, концерт Брамса",note:"Та же программа повторяется 24.10 в 19:00."},
+ {d:"2026-10-23",t:"19:30",title:"Les Ballets Espagnols de «La Argentina»",sub:"Compañía Antonio Najarro",venue:"Les Arts, Sala Principal",cat:"dance",price:"от 15 €",st:"ok",
+  desc:"Испанский балет: восстановленный репертуар легендарной Антонии Мерсе «Ла Архентины» на музыку Альбениса и Гранадоса, с живым оркестром.",
+  buy:"https://www.lesarts.com/es/programacion/c/1292-les-ballets-espagnols-de-la-argentina.html",
+  video:"https://www.youtube.com/watch?v=ZH8vMGjxMLI",vnote:"тизер компании, возможно другой постановки",note:"Повтор 24.10 в 19:00."},
+ {d:"2026-10-23",t:"20:00",title:"Morat",sub:"Ya es mañana Tour",venue:RA,cat:"pop",price:"45,40–136 €",st:"ok",
+  desc:"Колумбийская поп-фолк-рок группа, одна из самых популярных латиноамериканских групп в Испании.",
+  buy:"https://www.ticketmaster.es/event/morat-entradas/1856771310",
+  video:"https://www.youtube.com/watch?v=TJSZGoS_YFg",vnote:"официальный клип «Sin ti»",note:"Цены Ticketmaster уже со сбором: танцпол 51 €, сидячие 45,40–68 €, Front Stage 102 €, ранний вход 73,60 € и 136 €. VIP-ложа 440 € на сайте арены."},
+ {d:"2026-10-23",t:"21:30",title:"35 лет Jimmy Glass",sub:"Perico Sambeat и гости",venue:JG,cat:"jazz",price:"20 € с напитком",st:"ok",
+  desc:"Юбилейный вечер клуба: лучшие джазмены Валенсии во главе с саксофонистом Перико Самбеатом, в гостях Javier Vercher, Voro García, Clara Juan Soler.",
+  buy:"https://www.jimmyglassjazz.net/contactoreservas/",buyL:"Забронировать столик",
+  video:"https://www.youtube.com/watch?v=hBz-TYvq4t0",vnote:"Самбеат в этом клубе, другой вечер",note:"Двери в 20:45."},
+ {d:"2026-10-23",t:"22:00",title:"Beatles Monumental",sub:"La Banda del Late Motiv",venue:RAA,cat:"pop",price:"27,50 €",st:"ok",
+  desc:"Бывшая хаус-бэнд телешоу Late Motiv Андреу Буэнафуэнте играет «Битлз», отталкиваясь от их испанских концертов 1965 года.",
+  buy:"https://www.roigarena.com/es/event/beatles-monumental-con-la-banda-del-late-motiv-20261023/tickets/",
+  video:"https://www.youtube.com/watch?v=DMpAVxfFXJE",vnote:"о группе, не об этом шоу"},
+ {d:"2026-10-24",t:"16:00",title:"Aaron Sevilla",sub:"Afrodise",venue:RA,cat:"electro",price:"44–60,50 €",st:"low",
+  desc:"Испанский диджей и продюсер: афро-хаус с латинскими и фламенко-мотивами. Дневной сет до полуночи.",
+  buy:"https://www.roigarena.com/es/event/Aaron-sevilla-20261026/tickets/",
+  video:"https://www.youtube.com/watch?v=HRptpPrSu7M",note:"Две волны танцпола распроданы, сейчас 60,50 €."},
+ {d:"2026-10-24",t:"19:00",title:"Orquesta Nacional de España, Zimmermann",venue:PM+", Sala Iturbi",cat:"classic",price:"9,50–20 €",st:"ok",
+  desc:"Повтор программы 23.10: концерт Уолтона с Циммерманом и Вторая Рахманинова. Свободны почти все зоны.",
+  buy:"https://palauvalencia.com/event?id=2729&mod=1790159201",
+  video:"https://www.youtube.com/watch?v=tmP_cG29gcg",vnote:"Циммерман, концерт Брамса"},
+ {d:"2026-10-24",t:"19:00",title:"Les Ballets Espagnols de «La Argentina»",sub:"Compañía Antonio Najarro",venue:"Les Arts, Sala Principal",cat:"dance",price:"от 15 €",st:"ok",
+  desc:"Повтор 23.10: испанский балет с живым оркестром.",
+  buy:"https://www.lesarts.com/es/programacion/c/1292-les-ballets-espagnols-de-la-argentina.html",
+  video:"https://www.youtube.com/watch?v=ZH8vMGjxMLI"},
+ {d:"2026-10-24",t:"21:00",title:"Lia Kali",sub:"Kaelis 2.0, финал тура",venue:RAA,cat:"latin",price:"40 €",st:"sold",
+  desc:"Барселонская исполнительница урбана и соула, последний концерт перед творческим перерывом.",
+  buy:"https://www.roigarena.com/es/event/lia-kali-20261024/tickets/",buyL:"Страница события",
+  video:"https://www.youtube.com/watch?v=h01TkWuy0Ow"},
+ {d:"2026-10-24",t:"23:30",title:"Elyella",venue:"Palau Alameda, Arquitecte Mora 2",cat:"electro",price:"от 26,40 €",st:"unknown",
+  desc:"Мадридский электронный дуэт: танцевальная смесь электроники, попа и инди-рока. Ночная вечеринка с живым сетом.",
+  buy:"https://www.universe.com/events/elyella-lo-mas-importante-valencia-tickets-45K63N",
+  video:"https://www.youtube.com/watch?v=Eyqq7CGfXGQ",vnote:"La Riviera, Мадрид"},
+ {d:"2026-10-25",t:"20:30",title:"The Lemon Twigs",venue:"La Rambleta, Bulevar Sur",cat:"indie",price:"30 € + 3 € сбор",st:"ok",
+  desc:"Братья Д'Аддарио из Нью-Йорка: ретро-поп-рок в духе Beatles и Beach Boys. Тур с альбомом «Look For Your Mind!».",
+  buy:"https://larambleta.com/the-lemon-twigs-world-tour-2026/#entradas",
+  video:"https://www.youtube.com/watch?v=dSCcFOlTDPI",vnote:"полный сет на KEXP",note:"Некоторые афиши ошибочно пишут Ram Club. Площадка сама продаёт билеты, верна La Rambleta."},
+ {d:"2026-10-25",t:"21:00",title:"Leo Rizzi",venue:"Sala Jerusalem, Convent de Jerusalem 55",cat:"pop",price:"от 30,90 €",st:"unknown",
+  desc:"Молодой испанский автор-исполнитель с Ибицы, тихий акустический поп. Известен песней «Amapolas».",
+  buy:"https://www.elcorteingles.es/entradas/conciertos/entradas-leo-rizzi-valencia-58423584231873/",
+  video:"https://www.youtube.com/watch?v=a129Ee23aZU",vnote:"«Amapolas», вживую на La 2"},
+ {d:"2026-10-25",t:"21:00",title:"No Te Va Gustar",venue:RA,cat:"pop",price:"—",st:"sold",
+  desc:"Уругвайская рок-группа, на сайте Roig Arena отмечена как распроданная.",
+  buy:"https://www.roigarena.com/es/eventos",buyL:"Афиша Roig Arena"}
+].filter(e=>e.cat!=="sport");
+
+const DOW = ["вс","пн","вт","ср","чт","пт","сб"];
+const state = {cat:null, day:null, pick:false, avail:false};
+const days = [...new Set(E.map(e=>e.d))].sort();
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const dateOf = d => new Date(d+"T12:00:00");
+
+function chip(label, pressed, onClick, extra){
+  const b = document.createElement("button");
+  b.className = "chip" + (extra ? " "+extra : "");
+  b.textContent = label;
+  b.setAttribute("aria-pressed", pressed);
+  b.addEventListener("click", onClick);
+  return b;
+}
+function buildFilters(){
+  const cats = document.getElementById("cats");
+  cats.querySelectorAll(".chip").forEach(n=>n.remove());
+  cats.append(chip("Все", state.cat===null, ()=>{state.cat=null;refresh()}));
+  Object.entries(CATS).forEach(([k,v])=>cats.append(chip(v, state.cat===k, ()=>{state.cat=state.cat===k?null:k;refresh()})));
+  const dd = document.getElementById("days");
+  dd.querySelectorAll(".chip").forEach(n=>n.remove());
+  dd.append(chip("Все", state.day===null, ()=>{state.day=null;refresh()}));
+  days.forEach(d=>{
+    const dt = dateOf(d);
+    dd.append(chip(dt.getDate()+" "+DOW[dt.getDay()], state.day===d, ()=>{state.day=state.day===d?null:d;refresh()}));
+  });
+  document.getElementById("f-pick").setAttribute("aria-pressed", state.pick);
+  document.getElementById("f-avail").setAttribute("aria-pressed", state.avail);
+}
+function card(e){
+  const off = e.st==="sold"||e.st==="cancel";
+  const links = (e.links||[]).map(([l,u])=>`<a class="btn" href="${esc(u)}" target="_blank" rel="noopener">${esc(l)}</a>`).join("");
+  const video = e.video ? `<a class="btn" href="${esc(e.video)}" target="_blank" rel="noopener"><span class="play"></span>Послушать</a>${e.vnote?`<span class="vnote">${esc(e.vnote)}</span>`:""}` : "";
+  return `<article class="card${e.pick?" is-pick":""}${off?" is-off":""}">
+    <div class="time">${esc(e.t)}</div>
+    <div class="main">
+      <h3 class="title">${esc(e.title)}${e.pick?'<span class="tag">мой выбор</span>':""}</h3>
+      <div class="sub">${e.sub?esc(e.sub)+" · ":""}${esc(e.venue)} · ${esc(CATS[e.cat])}</div>
+      <p class="desc">${esc(e.desc)}</p>
+      ${e.note?`<p class="note">${esc(e.note)}</p>`:""}
+    </div>
+    <div class="side">
+      <span class="price">${esc(e.price)}</span>
+      <span class="pill s-${e.st}">${ST[e.st]}</span>
+    </div>
+    <div class="actions">
+      <a class="btn${off?"":" buy"}" href="${esc(e.buy)}" target="_blank" rel="noopener">${esc(e.buyL||"Купить билет")}</a>
+      ${video}${links}
+    </div>
+  </article>`;
+}
+function refresh(){
+  buildFilters();
+  const list = E.filter(e=>(!state.cat||e.cat===state.cat)&&(!state.day||e.d===state.day)&&(!state.pick||e.pick)&&(!state.avail||(e.st!=="sold"&&e.st!=="cancel")));
+  document.getElementById("count").textContent = list.length + " из " + E.length;
+  const out = days.map(d=>{
+    const items = list.filter(e=>e.d===d).sort((a,b)=>a.t.localeCompare(b.t));
+    if(!items.length) return "";
+    const dt = dateOf(d);
+    return `<section class="day"><div class="dhead"><div class="dnum">${dt.getDate()}</div><div class="dname">${dt.toLocaleDateString("ru-RU",{weekday:"long"})}, окт</div></div><div class="cards">${items.map(card).join("")}</div></section>`;
+  }).join("");
+  document.getElementById("list").innerHTML = out || `<p class="empty">Под эти фильтры ничего не подходит. Снимите один из них.</p>`;
+}
+document.getElementById("f-pick").addEventListener("click",()=>{state.pick=!state.pick;refresh()});
+document.getElementById("f-avail").addEventListener("click",()=>{state.avail=!state.avail;refresh()});
+refresh();
+</script>
+
+</body>
+</html>
